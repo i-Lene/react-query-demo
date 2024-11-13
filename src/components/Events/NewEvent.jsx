@@ -5,7 +5,7 @@ import EventForm from "./EventForm.jsx";
 
 import { useMutation } from "@tanstack/react-query";
 
-import { createNewEvent } from "../../util/http.js";
+import { createNewEvent, queryClient } from "../../util/http.js";
 import ErrorBlock from "../UI/ErrorBlock.jsx";
 
 export default function NewEvent() {
@@ -14,8 +14,9 @@ export default function NewEvent() {
   const { mutate, isLoading, isError, error } = useMutation({
     mutationFn: createNewEvent,
     onSuccess: () => {
-      return navigate('/events')
-    }
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      navigate("/events");
+    },
   });
 
   function handleSubmit(formData) {
