@@ -21,7 +21,7 @@ export default function EventForm({ inputData, onSubmit, children }) {
     onSubmit({ ...data, image: selectedImage });
   }
 
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["images"],
     queryFn: fetchSelectableImages,
   });
