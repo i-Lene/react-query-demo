@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Modal from "../UI/Modal.jsx";
 import EventForm from "./EventForm.jsx";
-import { fetchEvent, updateEvent } from "../../util/http.js";
+import { fetchEvent, queryClient, updateEvent } from "../../util/http.js";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 export default function EditEvent() {
@@ -9,14 +9,23 @@ export default function EditEvent() {
   const { id } = useParams();
 
   // Fetch the event data
-  const { data: eventData, isLoading, isError } = useQuery({
+  const {
+    data: eventData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["event", id],
     queryFn: () => fetchEvent(id),
   });
 
   // Mutation to update the event
-  const mutation = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (formData) => updateEvent({ id, ...formData }),
+    onMutate: async (data) => {
+      const newEv = data.event;
+     await queryClient.cancelQueries({ queryKey: ["events", id] });
+      queryClient.setQueryData(["events", id], newEv);
+    },
     onSuccess: () => {
       navigate("../");
     },
@@ -24,7 +33,10 @@ export default function EditEvent() {
 
   // Form submission handler
   function handleSubmit(formData) {
-    mutation.mutate(formData);
+    mutate({
+      id: id,
+      event: formData,
+    });
   }
 
   // Close modal handler
@@ -46,8 +58,8 @@ export default function EditEvent() {
         <Link to="../" className="button-text">
           Cancel
         </Link>
-        <button type="submit" className="button" disabled={mutation.isLoading}>
-          {mutation.isLoading ? "Updating..." : "Update"}
+        <button type="submit" className="button" disabled={mutate.isLoading}>
+          {mutate.isLoading ? "Updating..." : "Update"}
         </button>
       </EventForm>
     </Modal>
