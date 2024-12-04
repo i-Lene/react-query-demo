@@ -91,3 +91,19 @@ export async function deleteEvent({ id }) {
 
   return response.json();
 }
+
+
+export async function updateEvent(data) {
+  const response = await fetch(`http://localhost:3000/events/${data.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update event.");
+  }
+  return response.json();
+}
